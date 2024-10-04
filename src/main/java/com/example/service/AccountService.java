@@ -1,61 +1,56 @@
 package com.example.service;
 import java.util.InputMismatchException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Account;
 import com.example.exception.AccountDuplicateException;
-import com.example.repository.AccountDAO;
-import com.example.repository.MessageDAO;
+import com.example.repository.AccountRepository;
 
 @Service
 public class AccountService {
-    @Autowired
-    private AccountDAO accountDAO;
+
+    private AccountRepository accountRepository;
 
     @Autowired
-    private MessageDAO messageDAO;
-
-    public AccountService()
-    {}
-
-    public Account createAccount(Account account) throws AccountDuplicateException
+    public AccountService(AccountRepository accountRepository)
     {
-        if(account.getUsername().trim() == "" ||
+        this.accountRepository = accountRepository;
+
+    }
+
+
+    public Optional<Account> createAccount(Account account) throws AccountDuplicateException
+    {
+        if(account.getUsername().trim().equals("") ||
            account.getPassword().length() < 4)
            {
-
-                if(this.accountDAO.selectAccount(account.getUsername()) != null)
-                {
-                    throw new AccountDuplicateException("This username has been taken");
-                }
-                else
-                {
-                    throw new InputMismatchException("The username or password is incorrectly formatted");
-                }
+            return null;
            }
-           return this.accountDAO.insertAccount(account.getUsername(), account.getPassword());
+           accountRepository.saveAndFlush(account);
+           return accountRepository.findByusername(account.getUsername());
     }
-    public Account loginAccount(Account account)
+    public Optional<Account> loginAccount(Account account)
     {
-        if(findAccount(account.getUsername(), account.getPassword()) == null)
+        if(accountRepository.existsByUsernameAndPassword(account.getUsername(),account.getPassword()) == false)
         {
             return null;
         }
-        return findAccount(account.getUsername(), account.getPassword());
+        return accountRepository.findByusername(account.getUsername());
     }
-    public Account findAccount(int accountId)
+    public Optional<Account> findAccountU(String Username)
     {
-        return this.accountDAO.selectAccount(accountId);
+        return accountRepository.findByusername(Username);
     }
-    public Account findAccount(String username)
+    public Optional<Account> findAccountID(int id)
     {
-        return this.accountDAO.selectAccount(username);
+        return accountRepository.findById(id);
     }
-    public Account findAccount(String username, String password)
+    public boolean accountExists(String username)
     {
-        return this.accountDAO.selectAccount(username, password);
+        return accountRepository.existsByusername(username);
     }
 
 }

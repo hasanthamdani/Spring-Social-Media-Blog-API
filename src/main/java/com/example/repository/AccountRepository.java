@@ -1,19 +1,31 @@
 package com.example.repository;
 
-import java.sql.SQLException;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.example.entity.Account;
 
-public interface AccountRepository {
+@Repository
+public interface AccountRepository extends JpaRepository<Account, Integer>{
 
-    //Post-Initiation and Pre-Consumption of AccountRepository Bean
-    public void init();
-    public void destroy();
     
-    //Create and Read Accounts
-    public Account insertAccount(String username, String password);
-    public Account selectAccount(String username, String password);
-    public Account selectAccount(String username);
-    public Account selectAccount(int account_id);
+    //INSERT ACCOUNT
+    public Account save(Account account);
 
+    //SELECT ACCOUNT BY USERNAME
+    Optional<Account> findByusername(String username);
+
+    //SELECT ACCOUNT BY ID
+    Optional<Account> findById(int Id);
+
+    //CHECK ACCOUNT BY ID
+    boolean existsById(int Id);
+
+    //CHECK ACCOUNT BY USERNAME
+    boolean existsByusername(String username);
+
+    //CHECK ACCOUNT BY USERNAME AND PASSWORD
+    boolean existsByUsernameAndPassword(String username, String password);
 }

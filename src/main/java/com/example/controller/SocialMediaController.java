@@ -12,13 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.azul.crs.client.Response;
 import com.example.entity.Account;
 import com.example.entity.Message;
 import com.example.exception.AccountDuplicateException;
@@ -34,54 +31,61 @@ import com.example.service.MessageService;
 
  @Controller
  @ResponseBody
-public class SocialMediaController {
-    @Autowired
-    private AccountService accountService;
 
-    @Autowired
+public class SocialMediaController {
+
+    private AccountService accountService;
     private MessageService messageService;
 
-    public SocialMediaController() {}
+    @Autowired
+    public SocialMediaController(AccountService accountService, MessageService messageService) 
+    {
+        this.accountService = accountService;
+        this.messageService = messageService;
+    }
     
 // /register endpoint
 @PostMapping("/register")
-public ResponseEntity<Account> register(@RequestBody Account account)
+public ResponseEntity<Optional<Account>> register(@RequestBody Account account)
 {
-    if(this.accountService.createAccount(account)!= null)
+    if(this.accountService.createAccount(account) == null)
     {
-        return ResponseEntity.status(200).body(this.accountService.createAccount(account));
+        if(this.accountService.accountExists(account.getUsername()) == true)
+        {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        else
+        {
+            return ResponseEntity.status(400).build();
+        }
+        
     }
-    return ResponseEntity.status(400).build();
-}
-// account duplicate exception
-
-@ExceptionHandler(AccountDuplicateException.class)
-@ResponseStatus(HttpStatus.CONFLICT)
-public String handleDuplicateConflict(AccountDuplicateException ex)
-{
-    return ex.getMessage();
+    return ResponseEntity.status(200).body(this.accountService.createAccount(account));
 }
 
 // login endpoint
 @PostMapping("/login")
-public ResponseEntity<Account> login(@RequestBody Account account)
+public ResponseEntity<Optional<Account>> login(@RequestBody Account account)
 {
-    if(this.accountService.loginAccount(account) != null)
+    if(this.accountService.loginAccount(account) == null)
     {
-        return ResponseEntity.status(200).body(this.accountService.loginAccount(account));
+        return ResponseEntity.status(401).build();
     }
-    return ResponseEntity.status(401).build();
+    return ResponseEntity.status(200).body(this.accountService.loginAccount(account));
 }
+
 // message endpoint
 @PostMapping("/messages")
 public ResponseEntity<Message> postMessage(@RequestBody Message message)
 {
-    if(this.messageService.createMessage(message) != null)
+    if(this.messageService.createMessage(message) == null)
     {
-        return ResponseEntity.status(200).body(this.messageService.createMessage(message));
+        return ResponseEntity.status(400).build();
     }
-    return ResponseEntity.status(400).build();
+    return ResponseEntity.status(200).body(this.messageService.createMessage(message));
+    
 }
+
 @GetMapping("/messages")
 public ResponseEntity<List<Message>> getAllMessages()
 {
@@ -90,33 +94,37 @@ public ResponseEntity<List<Message>> getAllMessages()
 
 // messages / message id endpoint
 @GetMapping("/messages/{message_id}")
-public ResponseEntity<Message> getMessagebyId(@PathVariable int message_id)
+public ResponseEntity<Message> getMessagebyId(@PathVariable String message_id)
 {
-    return ResponseEntity.status(200).body(this.messageService.findMessage(message_id));
+    return ResponseEntity.status(200).body(this.messageService.findMessage(Integer.valueOf(message_id)));
 }
+
 @DeleteMapping("/messages/{message_id}")
-public ResponseEntity<Integer> deleteMessagebyId(@PathVariable int message_id)
+public ResponseEntity<Integer> deleteMessagebyId(@PathVariable String message_id)
 {
-    if(this.messageService.findMessage(message_id) != null)
+    if(messageService.messageExists(Integer.valueOf(message_id)))
     {
-        return ResponseEntity.status(200).body(this.messageService.deleteMessage(message_id))
+        return ResponseEntity.status(200).body(this.messageService.deleteMessage(Integer.valueOf(message_id)));
     }
-    return ResponseEntity.status(200).build();
+        return ResponseEntity.status(200).build();
 }
+
 @PatchMapping("/messages/{message_id}")
-public ResponseEntity<Integer> editMessage(@PathVariable int message_id, @RequestBody String text)
+public ResponseEntity<Integer> editMessage(@PathVariable String message_id, @RequestBody String text)
 {
-    if(this.messageService.editMessage(message_id, text) != 0)
+    if(this.messageService.editMessage(message_id, text) == 0)
     {
-        return ResponseEntity.status(200).body(this.messageService.editMessage(message_id, text));
+        return ResponseEntity.status(400).build();
     }
-    return ResponseEntity.status(400).build();
+    return ResponseEntity.status(200).body(this.messageService.editMessage(message_id, text));
+    
 }
+
 // accounts endpoint
 @GetMapping("/accounts/{account_id}/messages")
-public ResponseEntity<List<Message>> getMessagesbyUser(@PathVariable int postedBy)
+public ResponseEntity<List<Message>> getMessagesbyUser(@PathVariable String account_id)
 {
-    return ResponseEntity.status(200).body(this.messageService.findMessagebyAccount(postedBy));
+    return ResponseEntity.status(200).body(this.messageService.findMessagebyAccount(Integer.valueOf(account_id)));
 }
 
 }
