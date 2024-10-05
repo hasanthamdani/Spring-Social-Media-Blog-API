@@ -22,15 +22,14 @@ public class AccountService {
     }
 
 
-    public Optional<Account> createAccount(Account account) throws AccountDuplicateException
+    public Account createAccount(Account account)
     {
-        if(account.getUsername().trim().equals("") ||
-           account.getPassword().length() < 4)
-           {
+        if(accountRepository.existsByUsername(account.getUsername()) ||
+        account.getUsername().equals("") == true || account.getPassword().length() < 4)
+        {
             return null;
-           }
-           accountRepository.saveAndFlush(account);
-           return accountRepository.findByusername(account.getUsername());
+        }
+        return  accountRepository.save(account);
     }
     public Optional<Account> loginAccount(Account account)
     {
@@ -38,11 +37,11 @@ public class AccountService {
         {
             return null;
         }
-        return accountRepository.findByusername(account.getUsername());
+        return accountRepository.findByUsername(account.getUsername());
     }
     public Optional<Account> findAccountU(String Username)
     {
-        return accountRepository.findByusername(Username);
+        return accountRepository.findByUsername(Username);
     }
     public Optional<Account> findAccountID(int id)
     {
@@ -50,7 +49,7 @@ public class AccountService {
     }
     public boolean accountExists(String username)
     {
-        return accountRepository.existsByusername(username);
+        return accountRepository.existsByUsername(username);
     }
 
 }

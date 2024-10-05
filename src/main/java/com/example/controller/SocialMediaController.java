@@ -7,14 +7,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.entity.Account;
 import com.example.entity.Message;
@@ -36,6 +38,7 @@ public class SocialMediaController {
 
     private AccountService accountService;
     private MessageService messageService;
+    //public static final Logger logger = LoggerFactory.getLogger(SocialMediaController.class);
 
     @Autowired
     public SocialMediaController(AccountService accountService, MessageService messageService) 
@@ -46,13 +49,13 @@ public class SocialMediaController {
     
 // /register endpoint
 @PostMapping("/register")
-public ResponseEntity<Optional<Account>> register(@RequestBody Account account)
+public ResponseEntity<Account> register(@RequestBody Account account) throws AccountDuplicateException
 {
     if(this.accountService.createAccount(account) == null)
     {
         if(this.accountService.accountExists(account.getUsername()) == true)
         {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            throw new AccountDuplicateException("Duplicate Account");
         }
         else
         {
@@ -63,6 +66,12 @@ public ResponseEntity<Optional<Account>> register(@RequestBody Account account)
     return ResponseEntity.status(200).body(this.accountService.createAccount(account));
 }
 
+//Exception Handler
+@ExceptionHandler(AccountDuplicateException.class)
+public ResponseEntity<String> duplicateUsernameHandler()
+{
+    return ResponseEntity.status(HttpStatus.CONFLICT).build();
+}
 // login endpoint
 @PostMapping("/login")
 public ResponseEntity<Optional<Account>> login(@RequestBody Account account)
@@ -102,21 +111,29 @@ public ResponseEntity<Message> getMessagebyId(@PathVariable String message_id)
 @DeleteMapping("/messages/{message_id}")
 public ResponseEntity<Integer> deleteMessagebyId(@PathVariable String message_id)
 {
-    if(messageService.messageExists(Integer.valueOf(message_id)))
+        if(messageService.messageExists(Integer.valueOf(message_id)))
     {
-        return ResponseEntity.status(200).body(this.messageService.deleteMessage(Integer.valueOf(message_id)));
+        messageService.deleteMessage(Integer.valueOf(message_id));
+        return ResponseEntity.status(200).body(1);
     }
         return ResponseEntity.status(200).build();
+    
 }
-
 @PatchMapping("/messages/{message_id}")
-public ResponseEntity<Integer> editMessage(@PathVariable String message_id, @RequestBody String text)
-{
-    if(this.messageService.editMessage(message_id, text) == 0)
+public ResponseEntity<Integer> editMessage(@RequestBody Message message, @PathVariable int message_id)
+{   
+    String text = message.getMessageText();
+
+    int result = messageService.editMessage(text, message_id);
+
+    //logger.info("Message_ID is passed to editMessage method "+ text + " " + message_id);
+    if(result == 0)
     {
+        //logger.info("Program determined successfully the message_id or text is null "+ text + " " + message_id);
         return ResponseEntity.status(400).build();
     }
-    return ResponseEntity.status(200).body(this.messageService.editMessage(message_id, text));
+    //logger.info("The message text should be valid and the message_id should exist "+ text + " " + message_id);
+    return ResponseEntity.status(200).body(result);
     
 }
 

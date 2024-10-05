@@ -2,11 +2,14 @@ package com.example.repository;
 
 import java.util.List;
 
+import javax.transaction.TransactionScoped;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.entity.Message;
 
@@ -20,19 +23,20 @@ public interface MessageRepository extends JpaRepository<Message,Integer>{
     public List<Message> findAll();
 
     //SELECT MESSAGE BY ID
-    public Message findBymessageId(int messageId);
+    public Message findByMessageId(int messageId);
 
     //DELETE MESSAGE BY ID
-    public int deleteById(int messageId);
+    public void deleteByMessageId(int messageId);
 
     //UPDATE MESSAGE BY ID
     @Modifying
-    @Query("update Message m set m.messageText = :Text where m.messageId = :Id")
-    public int updateMessagebymessageId(@Param(value = "Text") String messageText, @Param(value = "Id") String messageId);
+    @Transactional
+    @Query(value = "UPDATE Message m SET m.messageText = :text WHERE m.messageId = :id")
+    public int updateMessageByMessageId(@Param("text") String messageText, @Param("id") int messageId);
     
     //SELECT MESSAGE BY POSTEDBY
-    public List<Message> findBypostedBy(int postedBy);
+    public List<Message> findByPostedBy(int postedBy);
 
-    public boolean existsBymessageId(int messageId);
+    public boolean existsByMessageId(int messageId);
 
 }

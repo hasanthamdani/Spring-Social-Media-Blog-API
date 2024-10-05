@@ -32,30 +32,30 @@ public class MessageService {
            }
         return null;
     }
-    public int deleteMessage(int messageId)
+    public void deleteMessage(int messageId)
     {
-        return messageRepository.deleteById(messageId);
+        messageRepository.deleteById(messageId);
     }
 
-    public int editMessage(String message_id, String message_text)
+    public int editMessage(String message_text, int message_id)
     {
-        if(messageRepository.existsBymessageId(Integer.valueOf(message_id)) != false &&
-           !message_text.equals("") &&
-           message_text.length() <= 255)
+        if(messageRepository.existsByMessageId(message_id) == true &&
+           message_text.equals("") == false &&
+           message_text.length() < 255)
            {
-            return messageRepository.updateMessagebymessageId(message_text, message_id);
+            return messageRepository.updateMessageByMessageId(message_text, message_id);
            }
         return 0;
     }
 
     public Message findMessage(int messageId)
     {
-        return messageRepository.findBymessageId(messageId);
+        return messageRepository.findByMessageId(messageId);
     }
 
     public List<Message> findMessagebyAccount(int postedBy)
     {
-        return messageRepository.findBypostedBy(postedBy);
+        return messageRepository.findByPostedBy(postedBy);
     }
     public List<Message> findAllMessages()
     {
@@ -63,6 +63,6 @@ public class MessageService {
     }
     public boolean messageExists(int messageId)
     {
-        return messageRepository.existsBymessageId(messageId);
+        return messageRepository.existsByMessageId(messageId);
     }
 }
