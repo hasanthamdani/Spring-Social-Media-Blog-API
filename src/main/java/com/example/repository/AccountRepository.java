@@ -9,6 +9,12 @@ import org.springframework.stereotype.Repository;
 import com.example.entity.Account;
 
 @Repository
+
+/*
+ * Account Repository
+ * Part of Spring Data JPA, JPA Repository extends PageAndSorting functionality
+ * along with CRUD functionality focused on Account entities
+ */
 public interface AccountRepository extends JpaRepository<Account, Integer>{
 
     

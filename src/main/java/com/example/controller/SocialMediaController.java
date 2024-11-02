@@ -2,7 +2,6 @@ package com.example.controller;
 
 import java.util.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,28 +30,45 @@ import com.example.service.MessageService;
  * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
  */
 
+ //Could have been replaced with @RestController
  @Controller
+
+ //All returns will be serialized into Response
  @ResponseBody
 
+ /*
+  * Controller for MVC architecture which manages endpoints for any requests
+  */
 public class SocialMediaController {
 
     private AccountService accountService;
     private MessageService messageService;
+
+    // Used for debugging
     //public static final Logger logger = LoggerFactory.getLogger(SocialMediaController.class);
 
-    @Autowired
+    // Constructor Dependency Injection
     public SocialMediaController(AccountService accountService, MessageService messageService) 
     {
         this.accountService = accountService;
         this.messageService = messageService;
     }
     
-// /register endpoint
+/*
+ * Account Registration
+ * @param @RequestBody account
+ * @return ResponseEntity<Account> 
+ * 
+ * AccountDuplicateException will be thrown if account details exist
+ */
+
 @PostMapping("/register")
 public ResponseEntity<Account> register(@RequestBody Account account) throws AccountDuplicateException
 {
+    // Account was not created
     if(this.accountService.createAccount(account) == null)
     {
+        //Username was duplicated
         if(this.accountService.accountExists(account.getUsername()) == true)
         {
             throw new AccountDuplicateException("Duplicate Account");
@@ -66,16 +82,27 @@ public ResponseEntity<Account> register(@RequestBody Account account) throws Acc
     return ResponseEntity.status(200).body(this.accountService.createAccount(account));
 }
 
-//Exception Handler
+/*
+ * Account Duplicate Exception
+ * @return ResponseEntity<String> 
+ */
 @ExceptionHandler(AccountDuplicateException.class)
 public ResponseEntity<String> duplicateUsernameHandler()
 {
+    // .build() is used since there is no defined body
     return ResponseEntity.status(HttpStatus.CONFLICT).build();
 }
-// login endpoint
+
+/*
+ * Account Login
+ * @param @RequestBody account
+ * @return ResponseEntity<Optional<Account>> Handles null values differently to registration
+ * 
+ */
 @PostMapping("/login")
 public ResponseEntity<Optional<Account>> login(@RequestBody Account account)
 {
+    // If login does not succeed
     if(this.accountService.loginAccount(account) == null)
     {
         return ResponseEntity.status(401).build();
@@ -83,10 +110,16 @@ public ResponseEntity<Optional<Account>> login(@RequestBody Account account)
     return ResponseEntity.status(200).body(this.accountService.loginAccount(account));
 }
 
-// message endpoint
+
+/*
+ * Post Message
+ * @param @RequestBody message
+ * @return ResponseEntity<Message> 
+ */
 @PostMapping("/messages")
 public ResponseEntity<Message> postMessage(@RequestBody Message message)
 {
+    // If the message input is invalid
     if(this.messageService.createMessage(message) == null)
     {
         return ResponseEntity.status(400).build();
@@ -95,30 +128,52 @@ public ResponseEntity<Message> postMessage(@RequestBody Message message)
     
 }
 
+/*
+ * View all Messages
+ * @return ResponseEntity<List<Message>>
+ */
 @GetMapping("/messages")
 public ResponseEntity<List<Message>> getAllMessages()
 {
     return ResponseEntity.status(200).body(this.messageService.findAllMessages());
 }
 
-// messages / message id endpoint
+/*
+ * View all Messages by ID
+ * @param @PathVariable message_id Held in URI
+ * @return ResponseEntity<Message> 
+ */
 @GetMapping("/messages/{message_id}")
 public ResponseEntity<Message> getMessagebyId(@PathVariable String message_id)
 {
     return ResponseEntity.status(200).body(this.messageService.findMessage(Integer.valueOf(message_id)));
 }
 
+/*
+ * Delete Message by ID
+ * @param @PathVariable message_id Held in URI
+ * @return ResponseEntity<Integer> 
+ */
 @DeleteMapping("/messages/{message_id}")
 public ResponseEntity<Integer> deleteMessagebyId(@PathVariable String message_id)
 {
-        if(messageService.messageExists(Integer.valueOf(message_id)))
+    // Message exists
+    if(messageService.messageExists(Integer.valueOf(message_id)))
     {
         messageService.deleteMessage(Integer.valueOf(message_id));
+        // 1 row changes when message is deleted
         return ResponseEntity.status(200).body(1);
     }
         return ResponseEntity.status(200).build();
     
 }
+
+/*
+ * Edit Message by ID
+ * @param @RequestBody message
+ * @param @PathVariable messsage_id
+ * @return ResponseEntity<Integer>
+ */
 @PatchMapping("/messages/{message_id}")
 public ResponseEntity<Integer> editMessage(@RequestBody Message message, @PathVariable int message_id)
 {   
@@ -137,7 +192,11 @@ public ResponseEntity<Integer> editMessage(@RequestBody Message message, @PathVa
     
 }
 
-// accounts endpoint
+/*
+ * See all Messsages by Account ID
+ * @param @PathVariable account_id
+ * @return ResponseEntity<List<Message>>
+ */
 @GetMapping("/accounts/{account_id}/messages")
 public ResponseEntity<List<Message>> getMessagesbyUser(@PathVariable String account_id)
 {
