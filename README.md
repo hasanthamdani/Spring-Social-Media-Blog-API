@@ -1,33 +1,3 @@
-# Project: Spring Social media blog API
-
-## Background 
-
-Full-stack applications are typically concerned with both a front end, that displays information to the user and takes in input, and a backend, that manages persisted information.
-
-This project will be a backend for a hypothetical social media app, where we must manage our users’ accounts as well as any messages that they submit to the application. However, the functionality for this project will leverage a popular web application framework for Java known as Spring. The Spring framework allows for automatic injection and configuration of many features, including data persitence, endpoints and conventional data manipulation logic (CRUD operations).
-
-In our hypothetical micro-blogging or messaging app, any user should be able to see all of the messages posted to the site, or they can see the messages posted by a particular user. In either case, we require a backend which is able to deliver the data needed to display this information as well as process actions like logins, registrations, message creations, message updates, and message deletions.
-
-## Database Tables 
-
-The following tables will be initialized in your project's built-in database upon startup using the configuration details in the application.properties file and the provided SQL script.
-
-### Account
-```
-accountId integer primary key auto_increment,
-username varchar(255) not null unique,
-password varchar(255)
-```
-
-### Message
-```
-messageId integer primary key auto_increment,
-postedBy integer,
-messageText varchar(255),
-timePostedEpoch long,
-foreign key (postedBy) references Account(accountId)
-```
-
 # Spring Technical Requirement
 
 ## Project must leverage the Spring Boot Framework
@@ -104,3 +74,59 @@ As a user, I should be able to submit a GET request on the endpoint GET localhos
 - The project was created leveraging the spring framework, including dependency injection, autowire functionality and/or Spring annotations.
 
 # Good luck!
+
+
+# Spring Social media blog API
+
+## Project Description
+
+Full-stack applications are typically concerned with both a front end, that displays information to the user and takes in input, and a backend, that manages persisted information.
+
+This project will be a backend for a hypothetical social media app, where we must manage our users’ accounts as well as any messages that they submit to the application. However, the functionality for this project will leverage a popular web application framework for Java known as Spring. The Spring framework allows for automatic injection and configuration of many features, including data persitence, endpoints and conventional data manipulation logic (CRUD operations).
+
+Here goes your awesome project description!
+
+## Technologies Used
+
+* Tech 1 - version 1.0
+* Tech 2 - version 2.0
+* Tech 3 - version 3.0
+
+## Features
+
+List of features ready and TODOs for future development
+* Awesome feature 1
+* Awesome feature 2
+* Awesome feature 3
+
+To-do list:
+* Wow improvement to be done 1
+* Wow improvement to be done 2
+
+## Getting Started
+   
+(include git clone command)
+(include all environment setup steps)
+
+> Be sure to include BOTH Windows and Unix command  
+> Be sure to mention if the commands only work on a specific platform (eg. AWS, GCP)
+
+- All the `code` required to get started
+- Images of what it should look like
+
+## Usage
+
+> Here, you instruct other people on how to use your project after they’ve installed it. This would also be a good place to include screenshots of your project in action.
+
+In our hypothetical micro-blogging or messaging app, any user should be able to see all of the messages posted to the site, or they can see the messages posted by a particular user. In either case, we require a backend which is able to deliver the data needed to display this information as well as process actions like logins, registrations, message creations, message updates, and message deletions.
+
+
+## Contributors
+
+> Here list the people who have contributed to this project. (ignore this section, if its a solo project)
+
+## License
+
+This project uses the following license: [<license_name>](<link>).
+
+
